@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b7a75">
+<title>Saúde</title>
+<style>
+:root{--primary:#0b7a75;--primary2:#0e948d;--bg:#f3f7f7;--card:#fff;--text:#18302f;--muted:#6d7c7b;--danger:#c0392b;--line:#dce7e6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text);padding-bottom:85px}
+header{background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;padding:25px 18px 22px;border-radius:0 0 24px 24px}
+header h1{margin:0;font-size:28px}header p{margin:6px 0 0;opacity:.9}
+.container{max-width:760px;margin:auto;padding:16px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:-5px}
+.card{background:var(--card);border-radius:18px;padding:17px;box-shadow:0 4px 15px #164d4b12;border:1px solid #e4eeee}
+.card .icon{font-size:29px}.card h3{margin:8px 0 4px;font-size:17px}.card p{margin:0;color:var(--muted);font-size:13px}
+.section{display:none}.section.active{display:block}
+h2{font-size:22px;margin:20px 0 12px}
+.panel{background:white;border:1px solid var(--line);border-radius:17px;padding:15px;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.item-title{font-weight:bold;font-size:16px}.small{font-size:13px;color:var(--muted);line-height:1.5}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#e5f5f3;color:var(--primary);font-size:12px;font-weight:bold}
+button{border:0;border-radius:12px;padding:12px 15px;background:var(--primary);color:white;font-weight:bold;font-size:14px;cursor:pointer}
+button.secondary{background:#e9f0ef;color:var(--primary)}button.danger{background:#fbe8e6;color:var(--danger)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:15px;color:var(--text)}
+label{display:block;font-size:13px;font-weight:bold;margin:10px 0 5px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.empty{text-align:center;padding:25px;color:var(--muted)}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);display:flex;justify-content:center;z-index:10}
+nav button{background:white;color:var(--muted);border-radius:0;padding:10px 5px;flex:1;max-width:150px;font-size:12px}
+nav button.active{color:var(--primary);background:#eef8f7}
+nav span{display:block;font-size:21px;margin-bottom:2px}
+.search{margin-bottom:12px}
+.note{background:#fff8df;border:1px solid #f1df9d;border-radius:12px;padding:12px;font-size:13px;color:#6e5a18}
+@media(max-width:500px){.formgrid{grid-template-columns:1fr}.cards{gap:9px}.card{padding:14px}}
+</style>
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="saude-icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="saude-icon-512.png">
+<link rel="apple-touch-icon" href="saude-icon-192.png">
+<meta name="theme-color" content="#0b7a75">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Saúde">
+</head>
+<body>
+<header>
+  <div class="container">
+    <h1>🏥 Saúde</h1>
+    <p>Organize consultas, exames e medicamentos</p><div style='font-size:11px;margin-top:8px;opacity:.8'>Versão corrigida • dados salvos neste aparelho</div>
+  </div>
+</header>
+
+<main class="container">
+<section id="inicio" class="section active">
+  <div class="cards">
+    <div class="card" onclick="show('consultas')"><div class="icon">👨‍⚕️</div><h3>Consultas</h3><p id="countConsultas">0 registradas</p></div>
+    <div class="card" onclick="show('exames')"><div class="icon">🧪</div><h3>Exames</h3><p id="countExames">0 registrados</p></div>
+    <div class="card" onclick="show('medicamentos')"><div class="icon">💊</div><h3>Medicamentos UBS</h3><p id="countMedicamentos">0 cadastrados</p></div>
+    <div class="card" onclick="show('historico')"><div class="icon">📋</div><h3>Histórico</h3><p>Todos os registros</p></div>
+  </div>
+  <h2>Resumo</h2>
+  <div id="resumo"></div>
+  <div class="note">💾 Os dados ficam salvos neste aparelho usando o armazenamento do navegador.</div>
+</section>
+
+<section id="consultas" class="section">
+<h2>👨‍⚕️ Consultas</h2>
+<button onclick="formConsulta()">＋ Nova consulta</button>
+<div id="listaConsultas" style="margin-top:12px"></div>
+</section>
+
+<section id="exames" class="section">
+<h2>🧪 Exames</h2>
+<button onclick="formExame()">＋ Novo exame</button>
+<div id="listaExames" style="margin-top:12px"></div>
+</section>
+
+<section id="medicamentos" class="section">
+<h2>💊 Medicamentos na UBS</h2>
+<input class="search" id="buscaMed" placeholder="🔎 Buscar medicamento..." oninput="renderMed()">
+<button onclick="formMed()">＋ Cadastrar medicamento</button>
+<div id="listaMed" style="margin-top:12px"></div>
+</section>
+
+<section id="historico" class="section">
+<h2>📋 Histórico</h2>
+<div id="listaHistorico"></div>
+</section>
+
+<div id="modal"></div>
+</main>
+
+<nav>
+<button onclick="show('inicio')" data-page="inicio" class="active"><span>🏠</span>Início</button>
+<button onclick="show('consultas')" data-page="consultas"><span>👨‍⚕️</span>Consultas</button>
+<button onclick="show('exames')" data-page="exames"><span>🧪</span>Exames</button>
+<button onclick="show('medicamentos')" data-page="medicamentos"><span>💊</span>Medicamentos</button>
+<button onclick="show('historico')" data-page="historico"><span>📋</span>Histórico</button>
+</nav>
+
+<script>
+const KEY='appSaudeV1';
+let db=JSON.parse(localStorage.getItem(KEY)||'{"consultas":[],"exames":[],"medicamentos":[]}');
+function save(){
+ try{localStorage.setItem(KEY,JSON.stringify(db));renderAll();return true}
+ catch(e){alert('Não foi possível salvar os dados neste navegador. Verifique as permissões de armazenamento.');return false}
+}
+function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function show(id){
+ document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+ renderAll();
+ window.scrollTo(0,0);
+}
+function dateBR(d){if(!d)return '';let [y,m,day]=d.split('-');return `${day}/${m}/${y}`}
+function renderAll(){renderConsultas();renderExames();renderMed();renderHistorico();renderResumo();
+ document.getElementById('countConsultas').textContent=db.consultas.length+' registradas';
+ document.getElementById('countExames').textContent=db.exames.length+' registrados';
+ document.getElementById('countMedicamentos').textContent=db.medicamentos.length+' cadastrados';
+}
+function formConsulta(){
+ document.getElementById('modal').innerHTML=`<div class="panel"><h2>Nova consulta</h2>
+ <div class="formgrid"><div><label>Data</label><input id="cdata" type="date"></div><div><label>Horário</label><input id="chora" type="time"></div></div>
+ <label>Especialidade</label><input id="cesp" placeholder="Ex.: Clínico Geral">
+ <label>Médico</label><input id="cmed" placeholder="Nome do médico">
+ <label>Unidade/UBS</label><input id="cubs" placeholder="Nome da unidade">
+ <label>Observações</label><textarea id="cobs" rows="3"></textarea>
+ <div class="actions"><button onclick="addConsulta()">Salvar</button><button class="secondary" onclick="closeModal()">Cancelar</button></div></div>`;
+ document.getElementById('modal').scrollIntoView({behavior:'smooth'});
+}
+function addConsulta(){requiredValue('cdata','Data da consulta');requiredValue('cesp','Especialidade');db.consultas.push({id:Date.now(),data:document.getElementById('cdata').value,hora:document.getElementById('chora').value,esp:document.getElementById('cesp').value,med:document.getElementById('cmed').value,ubs:document.getElementById('cubs').value,obs:document.getElementById('cobs').value,status:'Agendada'});save();closeModal()}
+function renderConsultas(){
+ let el=document.getElementById('listaConsultas'); if(!db.consultas.length){el.innerHTML='<div class="empty">Nenhuma consulta cadastrada.</div>';return}
+ el.innerHTML=db.consultas.slice().sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora)).map(x=>`<div class="panel"><div class="row"><div><div class="item-title">${esc(x.esp||'Consulta')}</div><div class="small">📅 ${dateBR(x.data)} ${x.hora?'às '+esc(x.hora):''}<br>👨‍⚕️ ${esc(x.med||'Não informado')}<br>📍 ${esc(x.ubs||'Não informado')}</div></div><span class="badge">${esc(x.status)}</span></div>${x.obs?`<p class="small">📝 ${esc(x.obs)}</p>`:''}<div class="actions"><button class="secondary" onclick="toggleConsulta(${x.id})">${x.status==='Agendada'?'Marcar realizada':'Marcar agendada'}</button><button class="danger" onclick="del('consultas',${x.id})">Excluir</button></div></div>`).join('')
+}
+function toggleConsulta(id){let x=db.consultas.find(a=>a.id===id);x.status=x.status==='Agendada'?'Realizada':'Agendada';save()}
+function formExame(){
+ document.getElementById('modal').innerHTML=`<div class="panel"><h2>Novo exame</h2>
+ <label>Exame</label><input id="edata" placeholder="Ex.: Hemograma">
+ <div class="formgrid"><div><label>Data</label><input id="edate" type="date"></div><div><label>Status</label><select id="estatus"><option>Solicitado</option><option>Agendado</option><option>Realizado</option><option>Resultado disponível</option></select></div></div>
+ <label>Local</label><input id="elocal" placeholder="Laboratório/UBS">
+ <label>Observações / resultado</label><textarea id="eobs" rows="3"></textarea>
+ <div class="actions"><button onclick="addExame()">Salvar</button><button class="secondary" onclick="closeModal()">Cancelar</button></div></div>`;
+ document.getElementById('modal').scrollIntoView({behavior:'smooth'});
+}
+function addExame(){requiredValue('edata','Nome do exame');db.exames.push({id:Date.now(),nome:document.getElementById('edata').value,data:document.getElementById('edate').value,status:document.getElementById('estatus').value,local:document.getElementById('elocal').value,obs:document.getElementById('eobs').value});save();closeModal()}
+function renderExames(){
+ let el=document.getElementById('listaExames');if(!db.exames.length){el.innerHTML='<div class="empty">Nenhum exame cadastrado.</div>';return}
+ el.innerHTML=db.exames.slice().sort((a,b)=>b.data.localeCompare(a.data)).map(x=>`<div class="panel"><div class="row"><div><div class="item-title">${esc(x.nome||'Exame')}</div><div class="small">📅 ${dateBR(x.data)}<br>📍 ${esc(x.local||'Não informado')}</div></div><span class="badge">${esc(x.status)}</span></div>${x.obs?`<p class="small">📝 ${esc(x.obs)}</p>`:''}<div class="actions"><button class="danger" onclick="del('exames',${x.id})">Excluir</button></div></div>`).join('')
+}
+function formMed(){
+ document.getElementById('modal').innerHTML=`<div class="panel"><h2>Medicamento na UBS</h2>
+ <label>Medicamento</label><input id="mnome" placeholder="Nome do medicamento">
+ <div class="formgrid"><div><label>UBS</label><input id="mubs" placeholder="Nome da UBS"></div><div><label>Quantidade</label><input id="mquant" placeholder="Ex.: 30 comprimidos"></div></div>
+ <label>Disponibilidade</label><select id="mstatus"><option>Disponível</option><option>Indisponível</option><option>Consultar</option></select>
+ <label>Data da consulta/retirada</label><input id="mdata" type="date">
+ <label>Observações</label><textarea id="mobs" rows="3"></textarea>
+ <div class="actions"><button onclick="addMed()">Salvar</button><button class="secondary" onclick="closeModal()">Cancelar</button></div></div>`;
+ document.getElementById('modal').scrollIntoView({behavior:'smooth'});
+}
+function addMed(){requiredValue('mnome','Nome do medicamento');db.medicamentos.push({id:Date.now(),nome:document.getElementById('mnome').value,ubs:document.getElementById('mubs').value,quant:document.getElementById('mquant').value,status:document.getElementById('mstatus').value,data:document.getElementById('mdata').value,obs:document.getElementById('mobs').value});save();closeModal()}
+function renderMed(){
+ let q=(document.getElementById('buscaMed')?.value||'').toLowerCase(), el=document.getElementById('listaMed');
+ let arr=db.medicamentos.filter(x=>x.nome.toLowerCase().includes(q));
+ if(!arr.length){el.innerHTML='<div class="empty">Nenhum medicamento encontrado.</div>';return}
+ el.innerHTML=arr.map(x=>`<div class="panel"><div class="row"><div><div class="item-title">💊 ${esc(x.nome)}</div><div class="small">📍 ${esc(x.ubs||'UBS não informada')}<br>📦 ${esc(x.quant||'Quantidade não informada')} ${x.data?'<br>📅 Retirada: '+dateBR(x.data):''}</div></div><span class="badge">${esc(x.status)}</span></div>${x.obs?`<p class="small">📝 ${esc(x.obs)}</p>`:''}<div class="actions"><button class="danger" onclick="del('medicamentos',${x.id})">Excluir</button></div></div>`).join('')
+}
+function renderHistorico(){
+ let arr=[...db.consultas.map(x=>({...x,tipo:'Consulta',nome:x.esp||'Consulta',data:x.data,det:`${x.med||''} ${x.ubs?'• '+x.ubs:''}`,status:x.status})),...db.exames.map(x=>({...x,tipo:'Exame',nome:x.nome||'Exame',det:x.local,status:x.status})) ,...db.medicamentos.map(x=>({...x,tipo:'Medicamento',nome:x.nome||'Medicamento',det:x.ubs,status:x.status}))].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+ let el=document.getElementById('listaHistorico');if(!arr.length){el.innerHTML='<div class="empty">Seu histórico aparecerá aqui.</div>';return}
+ el.innerHTML=arr.map(x=>`<div class="panel"><div class="row"><div><div class="item-title">${x.tipo==='Consulta'?'👨‍⚕️':x.tipo==='Exame'?'🧪':'💊'} ${esc(x.nome)}</div><div class="small">📅 ${dateBR(x.data)}<br>${esc(x.det||'')}</div></div><span class="badge">${esc(x.status||'')}</span></div></div>`).join('')
+}
+function renderResumo(){
+ let prox=db.consultas.filter(x=>x.status==='Agendada'&&x.data).sort((a,b)=>a.data.localeCompare(b.data))[0];
+ document.getElementById('resumo').innerHTML=prox?`<div class="panel"><div class="item-title">📅 Próxima consulta</div><div class="small">${dateBR(prox.data)} ${prox.hora?'às '+esc(prox.hora):''} — ${esc(prox.esp||'Consulta')}<br>📍 ${esc(prox.ubs||'Unidade não informada')}</div></div>`:`<div class="panel"><div class="empty">Nenhuma consulta agendada.</div></div>`;
+}
+function del(type,id){if(confirm('Excluir este registro?')){db[type]=db[type].filter(x=>x.id!==id);save()}}
+
+function closeModal(){document.getElementById('modal').innerHTML=''}
+function requiredValue(id,label){
+ const el=document.getElementById(id);
+ if(!el) return '';
+ const v=el.value.trim();
+ if(!v){alert('Informe: '+label);el.focus();throw new Error('campo obrigatório');}
+ return v;
+}
+
+renderAll();
+</script>
+
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script>
+</body>
+</html>
